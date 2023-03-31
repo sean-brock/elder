@@ -1,19 +1,25 @@
 #include <cstddef>
 #include <cstdint>
+#include <memory>
+#include <array>
 #include <queue>
 #include <vector>
+#include <bitset>
 
 namespace engine {
+
+using GenerationalIndexType = std::uint32_t;
+
 class GenerationalIndex {
 public:
   GenerationalIndex() = default;
-  GenerationalIndex(std::size_t index, std::uint64_t generation);
+  GenerationalIndex(GenerationalIndexType index, std::uint64_t generation);
   inline std::size_t index() const { return _index; }
 
   virtual ~GenerationalIndex() = default;
 
 private:
-  std::size_t _index;
+  GenerationalIndexType _index;
   std::uint64_t _generation;
 };
 
@@ -35,13 +41,17 @@ public:
 
 private:
   std::vector<AllocatorEntry> _entries;
-  std::queue<std::size_t> _free;
+  std::queue<GenerationalIndexType> _free;
 };
 
-template <typename T> struct ArrayEntry {
-  T value;
+template <typename T> struct IndexEntry {
+  T index = 0;
   std::uint64_t generation = 0;
 };
+
+
+constexpr std::size_t max_generational_index_array_size = 60000;
+using SparseArrayIndexType = std::uint16_t;
 
 template <typename T> class GenerationalIndexArray {
 public:
@@ -53,6 +63,9 @@ public:
   T &get(const GenerationalIndex &index) const;
 
 private:
-  std::vector<T> _array;
+  std::array<SparseArrayIndexType, max_generational_index_array_size> _indicies;
+  std::bitset<max_generational_index_array_size> _index_live;
+  std::vector<IndexEntry<GenerationalIndexType>> _data_ids;
+  std::vector<T> _data;
 };
 }; // namespace engine
