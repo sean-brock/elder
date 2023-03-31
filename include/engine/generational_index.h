@@ -1,6 +1,7 @@
-#import <cstddef>
-#import <cstdint>
-#import <vector>
+#include <cstddef>
+#include <cstdint>
+#include <queue>
+#include <vector>
 
 namespace engine {
 class GenerationalIndex {
@@ -28,11 +29,13 @@ public:
 
   GenerationalIndex allocate();
   bool deallocate(const GenerationalIndex &index);
-  bool is_live(const GenerationalIndex &index);
+  inline bool is_live(const GenerationalIndex &index) const {
+    return _entries[index.index()].is_live;
+  }
 
 private:
   std::vector<AllocatorEntry> _entries;
-  std::vector<std::size_t> _free;
+  std::queue<std::size_t> _free;
 };
 
 template <typename T> struct ArrayEntry {
@@ -48,5 +51,8 @@ public:
   void set(const GenerationalIndex &index, const T &value);
   const T &get_const(const GenerationalIndex &index) const;
   T &get(const GenerationalIndex &index) const;
+
+private:
+  std::vector<T> _array;
 };
 }; // namespace engine
