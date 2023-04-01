@@ -1,6 +1,7 @@
 #define CATCH_CONFIG_MAIN
 #include <catch2/catch_test_macros.hpp>
 #include <engine/generational_index.h>
+#include <unordered_map>
 #include <unordered_set>
 
 using namespace engine;
@@ -33,4 +34,46 @@ TEST_CASE("Allocation", "[GenerationalIndexAllocator]") {
   REQUIRE(realloc.index() == last.index());
   // Generation should be diff
   REQUIRE(realloc.generation() != last.generation());
+}
+
+TEST_CASE("Array insert and remove", "[GenerationalIndexArray]") {
+  GenerationalIndexAllocator alloc;
+  GenerationalIndexArray<int> ints;
+  std::unordered_map<GenerationalIndexType, int> values;
+  std::vector<GenerationalIndex> gen_indices;
+
+  auto input_transform = [](int x) { return x * 100; };
+
+  // add 5 values
+  for (int i = 0; i < 5; i++) {
+    GenerationalIndex index = alloc.allocate();
+    auto value = input_transform(i);
+    ints.set(index, value);
+    values[index.index()] = value;
+    gen_indices.push_back(index);
+  }
+
+  for (int i = 0; i < 5; i++) {
+    GenerationalIndex index = gen_indices[i];
+    REQUIRE(ints.get(index) == values[index.index()]);
+  }
+  // remove 1 value in middle
+  ints.remove(gen_indices[3]);
+  alloc.deallocate(gen_indices[3]);
+  gen_indices.erase(gen_indices.begin() + 3);
+  for (int i = 0; i < 4; i++) {
+    GenerationalIndex index = gen_indices[i];
+    REQUIRE(ints.get(index) == values[index.index()]);
+  }
+
+  // add it back
+  GenerationalIndex new_index = alloc.allocate();
+  int new_val = input_transform(new_index.index());
+  gen_indices.push_back(new_index);
+  ints.set(new_index, new_val);
+  values[new_index.index()] = new_val;
+  for (int i = 0; i < 5; i++) {
+    GenerationalIndex index = gen_indices[i];
+    REQUIRE(ints.get(index) == values[index.index()]);
+  }
 }
