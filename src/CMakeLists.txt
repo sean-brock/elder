@@ -16,6 +16,11 @@ target_include_directories(engine_library PUBLIC ../include)
 
 # All users of this library will need at least C++11
 target_compile_features(engine_library PUBLIC cxx_std_20)
+if(MSVC)
+  target_compile_options(engine_library PRIVATE /W4 /WX)
+else()
+  target_compile_options(engine_library PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
 
 # IDEs should put the headers in a nice place
 source_group(

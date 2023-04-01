@@ -12,6 +12,11 @@ add_executable(testlib test_generational_index.cpp)
 
 # I'm using C++17 in the test
 target_compile_features(testlib PRIVATE cxx_std_20)
+if(MSVC)
+  target_compile_options(testlib PRIVATE /W4 /WX)
+else()
+  target_compile_options(testlib PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
 
 # Should be linked to the main library, as well as the Catch2 testing library
 target_link_libraries(testlib PRIVATE engine_library Catch2::Catch2WithMain)
