@@ -8,7 +8,7 @@ FetchContent_MakeAvailable(Catch2)
 
 
 # Tests need to be added as executables first
-add_executable(testlib test_generational_index.cpp)
+add_executable(testlib generational_index.cpp ecs.cpp)
 
 # I'm using C++17 in the test
 target_compile_features(testlib PRIVATE cxx_std_20)

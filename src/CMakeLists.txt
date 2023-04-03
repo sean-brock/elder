@@ -6,7 +6,7 @@ file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${elder_SOURCE_DIR}/include/engine/*.h"
 # set(HEADER_LIST "${elder_SOURCE_DIR}/include/engine/game_state.h")
 
 # Make an automatic library - will be static or dynamic based on user setting
-add_library(engine_library game_state.cpp generational_index.cpp ${HEADER_LIST})
+add_library(engine_library game_state.cpp generational_index.cpp ecs.cpp ${HEADER_LIST})
 
 # We need this directory, and users of our library will need it too
 target_include_directories(engine_library PUBLIC ../include)
