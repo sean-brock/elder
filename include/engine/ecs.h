@@ -4,6 +4,7 @@
 #include <engine/components.h>
 #include <engine/generational_index.h>
 #include <engine/type_map.h>
+#include <utility>
 namespace engine {
 
 using Entity = GenerationalIndex;
@@ -20,12 +21,6 @@ private:
   GenerationalIndexAllocator entity_allocator;
 };
 
-/*
-struct Resource {
-  virtual ~Resource() = 0;
-};
-*/
-
 class ComponentRegistry {
 public:
   ComponentRegistry() = default;
@@ -37,28 +32,43 @@ public:
     return true;
   }
 
-  template <class ComponentType> bool add_component(Entity id) {
+  template <class ComponentType, typename... Args>
+  bool add_component(Entity id, Args &&...args) {
     EntityMap<ComponentType> entity_map =
         std::any_cast<EntityMap<ComponentType>>(
             _components.find<ComponentType>()->second);
     if (entity_map.contains(id))
       return false;
-    entity_map.set(id, ComponentType());
+    entity_map.set(id, ComponentType(std::forward<Args>(args)...));
     return true;
   }
 
 private:
   TypeMap<std::any> _components;
 };
-
 /*
 class ResourceRegistry {
 public:
   ResourceRegistry() = default;
-  template <class ResourceType> bool register_resource();
+
+  template <class ResourceType> bool register_resource() {
+    if (_resources.contains<ResourceType>())
+      return false;
+    _resources.put<ResourceType>();
+    return true;
+  }
+
+  template <class ResourceType>
+  bool add_resource(std::unique_ptr<ResourceType> resource) {
+    if (_resources.contains<ResourceType>()) {
+      return false;
+    }
+    _resources.put<ResourceType>(std::move(resource));
+    return true;
+  }
 
 private:
-  TypeMap<std::unique_ptr<EntityMap<Resource>>> _resources;
+  TypeMap<std::any> _resources;
 };
 */
 inline ComponentRegistry loadComponentRegistry() {
@@ -67,7 +77,13 @@ inline ComponentRegistry loadComponentRegistry() {
 
   return components;
 }
-// ResourceRegistry loadResourceRegistry();
+/*
+inline ResourceRegistry loadResourceRegistry() {
+  ResourceRegistry resources;
+  resources.register_resource<TileResource>();
+  return resources;
+}
+*/
 
 struct Registry {
 public:

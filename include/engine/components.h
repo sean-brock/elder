@@ -12,6 +12,10 @@ public:
 private:
   inline static std::atomic_int _next_id = 0;
 };
+
+struct TeamComponent {
+  bool is_x = true;
+};
 }; // namespace engine
 
 #endif
