@@ -4,6 +4,7 @@
 #include <engine/components.h>
 #include <engine/generational_index.h>
 #include <engine/type_map.h>
+#include <stdexcept>
 #include <utility>
 namespace engine {
 
@@ -34,13 +35,14 @@ public:
 
   template <class ComponentType, typename... Args>
   bool add_component(Entity id, Args &&...args) {
+    if (!_components.contains<ComponentType>()) {
+      throw std::runtime_error(
+          "Adding component but component type was not registered.");
+    }
     EntityMap<ComponentType> entity_map =
         std::any_cast<EntityMap<ComponentType>>(
             _components.find<ComponentType>()->second);
-    if (entity_map.contains(id))
-      return false;
-    entity_map.set(id, ComponentType(std::forward<Args>(args)...));
-    return true;
+    return entity_map.emplace(id, std::forward<Args>(args)...);
   }
 
 private:

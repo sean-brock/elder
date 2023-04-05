@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <memory>
 #include <queue>
+#include <utility>
 #include <vector>
 
 namespace engine {
@@ -56,28 +57,27 @@ public:
   GenerationalIndexArray() = default;
   virtual ~GenerationalIndexArray() = default;
 
-  void set(const GenerationalIndex &index, const T &value) {
-    if (!contains(index)) {
-      // not live yet
-      _index_live[index.index()] = true;
-      // add to end of packed array
-      _data_ids.push_back(index);
-      _data.push_back(value);
-      // map end of packedarray to this index
-      _indices[index.index()] = _data.size() - 1;
-    } else {
-      auto packed_array_index = _indices[index.index()];
-      _data[packed_array_index] = value;
-      // index should match, otherwise indices and data_ids are out of sync
-      assert(_data_ids[packed_array_index].index() == index.index());
-      // Update generation
-      _data_ids[packed_array_index] = index;
-    }
+  template <typename... Args>
+  bool emplace(const GenerationalIndex &index, Args &&...args) {
+    if (contains(index))
+      return false;
+    // not live yet
+    _index_live[index.index()] = true;
+    // add to end of packed array
+    _data_ids.push_back(index);
+    _data.emplace_back(std::forward<Args>(args)...);
+    // map end of packedarray to this index
+    _indices[index.index()] = _data.size() - 1;
+    return true;
   }
 
   const T &get(const GenerationalIndex &index) const {
     auto packed_array_index = check_and_translate_index(index);
     return _data[packed_array_index];
+  }
+
+  T &get(const GenerationalIndex &index) {
+    return const_cast<T &>(std::as_const(*this).get(index));
   }
 
   inline bool contains(const GenerationalIndex &index) const {

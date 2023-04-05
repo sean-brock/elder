@@ -47,7 +47,7 @@ TEST_CASE("Array insert and remove", "[GenerationalIndexArray]") {
   for (int i = 0; i < 5; i++) {
     GenerationalIndex index = alloc.allocate();
     auto value = input_transform(i);
-    ints.set(index, value);
+    ints.emplace(index, value);
     values[index.index()] = value;
     gen_indices.push_back(index);
   }
@@ -69,7 +69,7 @@ TEST_CASE("Array insert and remove", "[GenerationalIndexArray]") {
   GenerationalIndex new_index = alloc.allocate();
   int new_val = input_transform(new_index.index());
   gen_indices.push_back(new_index);
-  ints.set(new_index, new_val);
+  ints.emplace(new_index, new_val);
   values[new_index.index()] = new_val;
   for (int i = 0; i < 5; i++) {
     GenerationalIndex index = gen_indices[i];

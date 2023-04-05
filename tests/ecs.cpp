@@ -13,6 +13,7 @@ struct PositionComponent {
 
 TEST_CASE("Entity Create", "[ECS]") {
   Registry registry;
+  registry.components.register_component<PositionComponent>();
   ECS ecs;
   Entity e0 = ecs.create();
   REQUIRE(registry.components.add_component<PositionComponent>(e0));
