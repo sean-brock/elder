@@ -39,9 +39,8 @@ public:
       throw std::runtime_error(
           "Adding component but component type was not registered.");
     }
-    EntityMap<ComponentType> entity_map =
-        std::any_cast<EntityMap<ComponentType>>(
-            _components.find<ComponentType>()->second);
+    auto &entity_map = std::any_cast<EntityMap<ComponentType> &>(
+        _components.find<ComponentType>()->second);
     return entity_map.emplace(id, std::forward<Args>(args)...);
   }
 
