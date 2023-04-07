@@ -1,6 +1,5 @@
 #ifndef ENGINE_ECS_H
 #define ENGINE_ECS_H
-#include <engine/components.h>
 #include <engine/generational_index.h>
 #include <engine/type_map.h>
 #include <any>
@@ -52,51 +51,22 @@ class ComponentRegistry {
   TypeMap<std::any> _components;
 };
 
-/*
 class ResourceRegistry {
-public:
+ public:
   ResourceRegistry() = default;
 
-  template <class ResourceType> bool register_resource() {
-    if (_resources.contains<ResourceType>())
-      return false;
-    _resources.put<ResourceType>();
-    return true;
+  template <class ResourceType, typename... Args>
+  bool register_resource(Args&&... args) {
+    return _resources.emplace<ResourceType>(std::forward<Args>(args)...);
   }
 
-  template <class ResourceType>
-  bool add_resource(std::unique_ptr<ResourceType> resource) {
-    if (_resources.contains<ResourceType>()) {
-      return false;
-    }
-    _resources.put<ResourceType>(std::move(resource));
-    return true;
-  }
-
-private:
+ private:
   TypeMap<std::any> _resources;
 };
-*/
-inline ComponentRegistry loadComponentRegistry() {
-  ComponentRegistry components;
-  components.register_component<UniqueIDComponent>();
-
-  return components;
-}
-
-/*
-inline ResourceRegistry loadResourceRegistry() {
-  ResourceRegistry resources;
-  resources.register_resource<TileResource>();
-  return resources;
-}
-*/
 
 struct Registry {
- public:
-  Registry();
   ComponentRegistry components;
-  //  ResourceRegistry resources;
+  ResourceRegistry resources;
 };
 
 };  // namespace engine

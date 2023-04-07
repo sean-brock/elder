@@ -50,6 +50,12 @@ class TypeMap {
     m_map[getTypeId<Key>()] = std::forward<ValueType>(value);
   }
 
+  template <class Key, typename... Args>
+  inline bool emplace(Args&&... args) {
+    return m_map.try_emplace(getTypeId<Key>(), std::forward<Args>(args)...)
+        .second;
+  }
+
  private:
   template <class Key>
   inline static int getTypeId() {
