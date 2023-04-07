@@ -1,5 +1,5 @@
-#include <catch2/catch_test_macros.hpp>
 #include <engine/generational_index.h>
+#include <catch2/catch_test_macros.hpp>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -41,7 +41,9 @@ TEST_CASE("Array insert and remove", "[GenerationalIndexArray]") {
   std::unordered_map<GenerationalIndexType, int> values;
   std::vector<GenerationalIndex> gen_indices;
 
-  auto input_transform = [](int x) { return x * 100; };
+  auto input_transform = [](int x) {
+    return x * 100;
+  };
 
   // add 5 values
   for (int i = 0; i < 5; i++) {

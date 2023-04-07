@@ -13,15 +13,17 @@ namespace engine {
 using GenerationalIndexType = std::uint32_t;
 
 class GenerationalIndex {
-public:
+ public:
   GenerationalIndex() = default;
   GenerationalIndex(GenerationalIndexType index, std::uint64_t generation);
+
   inline GenerationalIndexType index() const { return _index; }
+
   inline std::uint64_t generation() const { return _generation; }
 
   virtual ~GenerationalIndex() = default;
 
-private:
+ private:
   GenerationalIndexType _index;
   std::uint64_t _generation;
 };
@@ -32,19 +34,22 @@ struct AllocatorEntry {
 };
 
 class GenerationalIndexAllocator {
-public:
+ public:
   GenerationalIndexAllocator() = default;
   virtual ~GenerationalIndexAllocator() = default;
 
   GenerationalIndex allocate();
-  bool deallocate(const GenerationalIndex &index);
-  inline bool is_live(const GenerationalIndex &index) const {
+  bool deallocate(const GenerationalIndex& index);
+
+  inline bool is_live(const GenerationalIndex& index) const {
     return _entries[index.index()].is_live;
   }
+
   inline std::size_t allocated() const { return _entries.size(); }
+
   inline std::size_t free() const { return _free.size(); }
 
-private:
+ private:
   std::vector<AllocatorEntry> _entries;
   std::queue<GenerationalIndexType> _free;
 };
@@ -52,13 +57,14 @@ private:
 constexpr std::size_t max_generational_index_array_size = 60000;
 using SparseArrayIndexType = std::uint16_t;
 
-template <typename T> class GenerationalIndexArray {
-public:
+template <typename T>
+class GenerationalIndexArray {
+ public:
   GenerationalIndexArray() = default;
   virtual ~GenerationalIndexArray() = default;
 
   template <typename... Args>
-  bool emplace(const GenerationalIndex &index, Args &&...args) {
+  bool emplace(const GenerationalIndex& index, Args&&... args) {
     if (contains(index))
       return false;
     // not live yet
@@ -71,20 +77,20 @@ public:
     return true;
   }
 
-  const T &get(const GenerationalIndex &index) const {
+  const T& get(const GenerationalIndex& index) const {
     auto packed_array_index = check_and_translate_index(index);
     return _data[packed_array_index];
   }
 
-  T &get(const GenerationalIndex &index) {
-    return const_cast<T &>(std::as_const(*this).get(index));
+  T& get(const GenerationalIndex& index) {
+    return const_cast<T&>(std::as_const(*this).get(index));
   }
 
-  inline bool contains(const GenerationalIndex &index) const {
+  inline bool contains(const GenerationalIndex& index) const {
     return _index_live[index.index()];
   }
 
-  void remove(const GenerationalIndex &index) {
+  void remove(const GenerationalIndex& index) {
     auto remove_id = check_and_translate_index(index);
     // if removing only item or last item in data
     if (remove_id == _data_ids.size() - 1) {
@@ -104,15 +110,15 @@ public:
     _data.pop_back();
   }
 
-private:
-  SparseArrayIndexType
-  check_and_translate_index(const GenerationalIndex &index) const {
+ private:
+  SparseArrayIndexType check_and_translate_index(
+      const GenerationalIndex& index) const {
     if (!contains(index)) {
       throw std::out_of_range(
           "GenerationalIndexArray accessed non-existent index.");
     }
     SparseArrayIndexType packed_array_index{_indices[index.index()]};
-    auto &stored_index = _data_ids[packed_array_index];
+    auto& stored_index = _data_ids[packed_array_index];
     if (stored_index.index() != index.index()) {
       throw std::runtime_error("Stored id does not match requested id.");
     }
@@ -129,4 +135,4 @@ private:
   std::vector<GenerationalIndex> _data_ids;
   std::vector<T> _data;
 };
-}; // namespace engine
+};  // namespace engine

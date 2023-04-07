@@ -1,5 +1,5 @@
-#include <algorithm>
 #include <engine/generational_index.h>
+#include <algorithm>
 #include <stdexcept>
 
 using namespace engine;
@@ -16,13 +16,13 @@ GenerationalIndex GenerationalIndexAllocator::allocate() {
   auto index = _free.front();
   _free.pop();
 
-  auto &entry = _entries[index];
+  auto& entry = _entries[index];
   entry.generation++;
   entry.is_live = true;
   return {index, entry.generation};
 }
 
-bool GenerationalIndexAllocator::deallocate(const GenerationalIndex &index) {
+bool GenerationalIndexAllocator::deallocate(const GenerationalIndex& index) {
   if (!_entries[index.index()].is_live) {
     return false;
   }

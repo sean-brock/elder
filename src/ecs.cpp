@@ -7,4 +7,5 @@ using namespace engine;
 // ResourceRegistry loadResourceRegistry() { return ResourceRegistry(); }
 
 Registry::Registry() : components(loadComponentRegistry()) {}
+
 //, resources(loadResourceRegistry()) {}

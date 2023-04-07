@@ -1,7 +1,7 @@
-#include <catch2/catch_test_macros.hpp>
 #include <engine/components.h>
 #include <engine/ecs.h>
 #include <engine/resources.h>
+#include <catch2/catch_test_macros.hpp>
 #include <memory>
 
 using namespace engine;

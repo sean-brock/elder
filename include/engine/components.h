@@ -2,20 +2,22 @@
 #define ENGINE_COMPONENTS_H
 
 #include <atomic>
+
 namespace engine {
 
 class UniqueIDComponent {
-public:
+ public:
   UniqueIDComponent() : id(++_next_id) {}
+
   int id;
 
-private:
+ private:
   inline static std::atomic_int _next_id = 0;
 };
 
 struct TeamComponent {
   bool is_x = true;
 };
-}; // namespace engine
+};  // namespace engine
 
 #endif
