@@ -16,7 +16,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 
   # Let's ensure -std=c++xx instead of -std=g++xx
   set(CMAKE_CXX_EXTENSIONS OFF)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --save-temps")
+  #set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --save-temps")
 
 
   # Let's nicely support folders in IDEs
@@ -56,7 +56,7 @@ FetchContent_MakeAvailable(fmtlib)
 # The compiled library code is here
 add_subdirectory(src)
 
-# add_subdirectory(apps)
+add_subdirectory(apps)
 
 # Testing only available if this is the main app
 # Emergency override MODERN_CMAKE_BUILD_TESTING provided as well

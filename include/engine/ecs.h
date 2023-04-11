@@ -122,6 +122,16 @@ class ComponentRegistry {
     return unique_entities;
   }
 
+  template <class ComponentType>
+  //std::function<ComponentType&(Entity)> component_accessor() {
+  auto component_accessor() {
+    return [&](Entity id) -> ComponentType& {
+      auto& entity_map = std::any_cast<EntityMap<ComponentType>&>(
+          _components.find<ComponentType>()->second);
+      return entity_map.get(id);
+    };
+  }
+
  private:
   AnyMap _components;
 };
