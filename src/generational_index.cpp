@@ -5,7 +5,7 @@
 using namespace engine;
 
 GenerationalIndex::GenerationalIndex(GenerationalIndexType index,
-                                     std::uint64_t generation)
+                                     std::uint32_t generation)
     : _index(index), _generation(generation) {}
 
 GenerationalIndex GenerationalIndexAllocator::allocate() {
