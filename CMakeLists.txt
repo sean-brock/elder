@@ -41,17 +41,14 @@ endif()
 # FetchContent_MakeAvailable was added in CMake 3.14; simpler usage
 include(FetchContent)
 
-# Accumulator library
-# This is header only, so could be replaced with git submodules or FetchContent
-#find_package(Boost REQUIRED)
-
 # Formatting library
 FetchContent_Declare(
-  fmtlib
+  fmt
   GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-  GIT_TAG 5.3.0)
-FetchContent_MakeAvailable(fmtlib)
-# Adds fmt::fmt
+  GIT_TAG 9.1.0)
+FetchContent_MakeAvailable(fmt)
+include_directories(${fmt_SOURCE_DIR}/include)
+
 
 # The compiled library code is here
 add_subdirectory(src)
