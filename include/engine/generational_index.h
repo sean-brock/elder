@@ -1,3 +1,7 @@
+#ifndef ENGINE_GENERATIONAL_INDEX_H
+#define ENGINE_GENERATIONAL_INDEX_H
+
+#include <fmt/core.h>
 #include <array>
 #include <bitset>
 #include <cassert>
@@ -23,7 +27,7 @@ class GenerationalIndex {
   inline std::uint32_t generation() const { return _generation; }
 
   struct HashFunction {
-    size_t operator()(const GenerationalIndex& index) const {
+    inline size_t operator()(const GenerationalIndex& index) const {
       static_assert(
           std::is_same<GenerationalIndexType, std::uint32_t>::value,
           "GenerationalIndex hash function only defined for uint32_t.");
@@ -137,8 +141,9 @@ class GenerationalIndexArray {
   SparseArrayIndexType check_and_translate_index(
       const GenerationalIndex& index) const {
     if (!contains(index)) {
-      throw std::out_of_range(
-          "GenerationalIndexArray accessed non-existent index.");
+      throw std::out_of_range(fmt::format(
+          "GenerationalIndexArray accessed non-existent index: {} {}",
+          index.index(), index.generation()));
     }
     SparseArrayIndexType packed_array_index{_indices[index.index()]};
     auto& stored_index = _data_ids[packed_array_index];
@@ -159,3 +164,4 @@ class GenerationalIndexArray {
   std::vector<T> _data;
 };
 };  // namespace engine
+#endif

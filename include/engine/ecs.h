@@ -59,9 +59,8 @@ class ComponentRegistry {
   template <class ComponentType>
   std::vector<Entity> has_component() {
     assert_registered<ComponentType>();
-    EntityMap<ComponentType> entity_map =
-        std::any_cast<EntityMap<ComponentType>&>(
-            _components.find<ComponentType>()->second);
+    auto& entity_map = std::any_cast<EntityMap<ComponentType>&>(
+        _components.find<ComponentType>()->second);
     return entity_map.indices();
   }
 
@@ -72,11 +71,14 @@ class ComponentRegistry {
         2 + sizeof...(RestComponentType);
     std::array<std::vector<GenerationalIndex>, num_component_types>
         entity_lists;
-    for (int i = 0; i < 2; i++) {
-      entity_lists[i] = has_component<FirstComponentType>();
-      if (entity_lists[i].empty())
-        return {};
-    }
+
+    entity_lists[0] = has_component<FirstComponentType>();
+    if (entity_lists[0].empty())
+      return {};
+    entity_lists[1] = has_component<SecondComponentType>();
+    if (entity_lists[1].empty())
+      return {};
+
     if constexpr (num_component_types > 2) {
       // detect if empty entity list for at least one component
       bool empty_entity_list = false;
@@ -123,11 +125,10 @@ class ComponentRegistry {
   }
 
   template <class ComponentType>
-  //std::function<ComponentType&(Entity)> component_accessor() {
   auto component_accessor() {
+    auto& entity_map = std::any_cast<EntityMap<ComponentType>&>(
+        _components.find<ComponentType>()->second);
     return [&](Entity id) -> ComponentType& {
-      auto& entity_map = std::any_cast<EntityMap<ComponentType>&>(
-          _components.find<ComponentType>()->second);
       return entity_map.get(id);
     };
   }

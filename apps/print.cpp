@@ -1,10 +1,8 @@
 #include <engine/ecs.h>
 
-#include <fmt/format.h>
-
+#include <fmt/core.h>
 #include <iostream>
-#include <tuple>
-#include <vector>
+#include <stdexcept>
 
 using namespace engine;
 
@@ -22,46 +20,64 @@ struct NameComponent {
   std::string name{"default"};
 };
 
+constexpr int num_entities = 60000;
+
 int main() {
   Registry registry;
   registry.components.register_component<PositionComponent>();
   registry.components.register_component<VelocityComponent>();
   registry.components.register_component<NameComponent>();
   ECS ecs;
-  Entity e0 = ecs.create();
-  Entity e1 = ecs.create();
-  Entity e2 = ecs.create();
-
-  registry.components.add_component<PositionComponent>(e0);
-  registry.components.add_component<NameComponent>(e0, "Entity 0");
-  registry.components.add_component<PositionComponent>(e1, 10, 10);
-  registry.components.add_component<NameComponent>(e1, "Entity 1");
-  registry.components.add_component<PositionComponent>(e2, 12, 22);
-  registry.components.add_component<VelocityComponent>(e2, 1, 0);
-  registry.components.add_component<NameComponent>(e2, "Entity 2");
-
+  for (int i = 0; i < num_entities; i++) {
+    Entity e = ecs.create();
+    if (!registry.components.add_component<NameComponent>(
+            e, "Entity " + std::to_string(i))) {
+      throw std::runtime_error(
+          fmt::format("Failed to add name component to {}", i));
+    }
+    if (i % 2 == 0) {
+      if (!registry.components.add_component<PositionComponent>(e, i, i))
+        throw std::runtime_error(
+            fmt::format("Failed to add position component to {}", i));
+    }
+    if (i % 3 == 0) {
+      if (!registry.components.add_component<VelocityComponent>(e, i + 2,
+                                                                i + 1))
+        throw std::runtime_error(
+            fmt::format("Failed to add velocity component to {}", i));
+    }
+  }
+  // Accessors for the component data
+  auto get_position =
+      registry.components.component_accessor<PositionComponent>();
+  auto get_name = registry.components.component_accessor<NameComponent>();
+  auto get_velocity =
+      registry.components.component_accessor<VelocityComponent>();
+  // Entity groups/views by shared components
   auto positioned_entities =
       registry.components.has_component<NameComponent, PositionComponent>();
   auto moving_entities =
       registry.components
           .has_component<NameComponent, PositionComponent, VelocityComponent>();
 
-  auto get_position =
-      registry.components.component_accessor<PositionComponent>();
-  auto get_name = registry.components.component_accessor<NameComponent>();
-  auto get_velocity =
-      registry.components.component_accessor<VelocityComponent>();
-
   fmt::print("# Entities:\n");
+  int sum_x = 0;
+  int sum_y = 0;
   for (const auto& id : positioned_entities) {
     PositionComponent& p = get_position(id);
-    fmt::print("{}: Position: ({}, {})\n", get_name(id).name, p.x, p.y);
+    sum_x += p.x / 2;
+    sum_y += p.y / 2;
   }
+  fmt::print("Position sum: ({}, {})\n", sum_x, sum_y);
 
-  fmt::print("# Entities in Motion:\n");
+  sum_x = 0;
+  sum_y = 0;
   for (const auto& id : moving_entities) {
     VelocityComponent& v = get_velocity(id);
-    fmt::print("{}: Velocity: ({}, {})\n", get_name(id).name, v.x, v.y);
+    sum_x += v.x;
+    sum_y += v.y;
   }
+  fmt::print("Velocity sum: ({}, {})\n", sum_x, sum_y);
+
   return 0;
 }
