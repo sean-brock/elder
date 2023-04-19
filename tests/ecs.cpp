@@ -53,6 +53,10 @@ TEST_CASE("Resource Create", "[ECS]") {
     */
 }
 
+void print_name(NameComponent& name) {
+  fmt::print("Viewed name: {}\n", name.name);
+}
+
 TEST_CASE("View", "[ECS]") {
   Registry registry;
   registry.components.register_component<PositionComponent>();
@@ -85,4 +89,7 @@ TEST_CASE("View", "[ECS]") {
       registry.components
           .has_component<VelocityComponent, PositionComponent, NameComponent>()
           .size() == 1);
+
+  foreach
+    <NameComponent>(registry.components, print_name);
 }

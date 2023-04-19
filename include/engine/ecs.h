@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <any>
 #include <functional>
+#include <future>
 #include <stdexcept>
 #include <unordered_set>
 #include <utility>
@@ -136,6 +137,16 @@ class ComponentRegistry {
  private:
   AnyMap _components;
 };
+
+template <class... ComponentType, typename Func>
+void foreach (ComponentRegistry& registry, Func f) {
+  // get entities which have ...ComponentType
+  auto entities = registry.has_component<ComponentType...>();
+  // Get components for each entitiy and call func
+  for (const auto& entity : entities) {
+    f(get_component<ComponentType>(entity)...);
+  }
+}
 
 class ResourceRegistry {
  public:

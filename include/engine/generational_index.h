@@ -79,8 +79,9 @@ class GenerationalIndexAllocator {
   std::queue<GenerationalIndexType> _free;
 };
 
-constexpr std::size_t max_generational_index_array_size = 60000;
 using SparseArrayIndexType = std::uint16_t;
+constexpr std::size_t max_generational_index_array_size{
+    std::numeric_limits<SparseArrayIndexType>::max()};
 
 template <typename T>
 class GenerationalIndexArray {

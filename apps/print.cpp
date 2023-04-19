@@ -1,8 +1,10 @@
 #include <engine/ecs.h>
 
 #include <fmt/core.h>
+#include <chrono>
 #include <iostream>
 #include <stdexcept>
+#include <thread>
 
 using namespace engine;
 
@@ -59,7 +61,7 @@ int main() {
   auto moving_entities =
       registry.components
           .has_component<NameComponent, PositionComponent, VelocityComponent>();
-
+  std::this_thread::sleep_for(std::chrono::seconds(10));
   fmt::print("# Entities:\n");
   int sum_x = 0;
   int sum_y = 0;
