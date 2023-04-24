@@ -134,6 +134,13 @@ class ComponentRegistry {
     };
   }
 
+  template <class ComponentType>
+  ComponentType& get_component(Entity id) {
+    auto& entity_map = std::any_cast<EntityMap<ComponentType>&>(
+        _components.find<ComponentType>()->second);
+    return entity_map.get(id);
+  }
+
  private:
   AnyMap _components;
 };
@@ -144,7 +151,7 @@ void foreach (ComponentRegistry& registry, Func f) {
   auto entities = registry.has_component<ComponentType...>();
   // Get components for each entitiy and call func
   for (const auto& entity : entities) {
-    f(get_component<ComponentType>(entity)...);
+    f(registry.get_component<ComponentType>(entity)...);
   }
 }
 

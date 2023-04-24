@@ -53,10 +53,6 @@ TEST_CASE("Resource Create", "[ECS]") {
     */
 }
 
-void print_name(NameComponent& name) {
-  fmt::print("Viewed name: {}\n", name.name);
-}
-
 TEST_CASE("View", "[ECS]") {
   Registry registry;
   registry.components.register_component<PositionComponent>();
@@ -91,5 +87,38 @@ TEST_CASE("View", "[ECS]") {
           .size() == 1);
 
   foreach
-    <NameComponent>(registry.components, print_name);
+    <NameComponent>(registry.components, [](const auto& name) {
+      fmt::print("Viewed name: {}\n", name.name);
+    });
+}
+
+constexpr void update_position(PositionComponent& p,
+                               const VelocityComponent& v) {
+  p.x += v.x;
+  p.y += v.y;
+}
+
+TEST_CASE("Iterate View", "[ECS]") {
+  Registry registry;
+  registry.components.register_component<PositionComponent>();
+  registry.components.register_component<VelocityComponent>();
+  ECS ecs;
+  constexpr int num_entities = 10000;
+  for (int i = 0; i < num_entities; i++) {
+    Entity e = ecs.create();
+    registry.components.add_component<PositionComponent>(e, 0, 0);
+    registry.components.add_component<VelocityComponent>(e, 1, 1);
+  }
+
+  constexpr int num_updates = 1000;
+  for (int i = 0; i < num_updates; i++) {
+    foreach
+      <PositionComponent, VelocityComponent>(registry.components,
+                                             update_position);
+  }
+  foreach
+    <PositionComponent>(registry.components, [](const PositionComponent& p) {
+      REQUIRE(p.x == num_updates);
+      REQUIRE(p.y == num_updates);
+    });
 }
